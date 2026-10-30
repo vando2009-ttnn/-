@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản lý chi tiêu cá nhân</title>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#718096;--primary:#5267e8;--border:#e7ebf2;--green:#16a36a;--red:#e05260}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1100px;margin:auto;padding:28px 18px 50px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-size:28px;margin:0}.sub{color:var(--muted);margin-top:4px}.month{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 5px 18px #1d2b4b08}
+.kicker{color:var(--muted);font-size:13px}.amount{font-size:25px;font-weight:750;margin-top:7px}.income{color:var(--green)}.expense{color:var(--red)}
+.grid{display:grid;grid-template-columns:1.05fr 1fr;gap:18px}.section-title{font-size:17px;font-weight:700;margin:0 0 14px}
+.chart-area{display:flex;align-items:center;justify-content:center;gap:25px;flex-wrap:wrap;min-height:245px}
+.donut{width:190px;height:190px;border-radius:50%;position:relative;background:conic-gradient(#dce2ee 0 100%)}
+.donut:after{content:"";position:absolute;inset:42px;background:white;border-radius:50%}
+.donut-center{position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;pointer-events:none}
+.donut-center strong{font-size:18px}.donut-center span{font-size:12px;color:var(--muted)}
+.legend{display:grid;gap:9px;min-width:145px}.legend-item{display:flex;align-items:center;gap:8px;font-size:13px}.dot{width:10px;height:10px;border-radius:50%;flex:none}
+form{display:grid;grid-template-columns:1fr 1fr;gap:10px}input,select,button{font:inherit;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:white;color:var(--text);min-width:0}input:focus,select:focus{outline:2px solid #5267e833;border-color:var(--primary)}.full{grid-column:1/-1}button{border:0;background:var(--primary);color:white;font-weight:650;cursor:pointer}button:hover{filter:brightness(.96)}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;white-space:nowrap}th,td{text-align:left;padding:12px 9px;border-bottom:1px solid var(--border)}th{font-size:12px;color:var(--muted);font-weight:650}td:last-child{text-align:right}.tag{font-size:12px;padding:4px 8px;border-radius:20px;background:#f0f2f7}.delete{background:#fff0f1;color:var(--red);padding:6px 9px;border-radius:8px;font-size:12px}
+.empty{text-align:center;color:var(--muted);padding:25px}.hint{font-size:12px;color:var(--muted);margin-top:12px}
+@media(max-width:760px){.cards{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.wrap{padding:20px 13px}.amount{font-size:23px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><h1>💰 Sổ chi tiêu</h1><div class="sub">Theo dõi thu nhập và chi tiêu của bạn</div></div>
+    <input class="month" type="month" id="monthFilter" aria-label="Chọn tháng">
+  </header>
+
+  <section class="cards">
+    <div class="card"><div class="kicker">Tổng thu nhập</div><div class="amount income" id="totalIncome">0 ₫</div></div>
+    <div class="card"><div class="kicker">Tổng chi tiêu</div><div class="amount expense" id="totalExpense">0 ₫</div></div>
+    <div class="card"><div class="kicker">Số dư</div><div class="amount" id="balance">0 ₫</div></div>
+  </section>
+
+  <main class="grid">
+    <section class="card">
+      <h2 class="section-title">📊 Biểu đồ chi tiêu</h2>
+      <div class="chart-area">
+        <div class="donut" id="donut"><div class="donut-center"><strong id="chartTotal">0 ₫</strong><span>Tổng chi tiêu</span></div></div>
+        <div class="legend" id="legend"><div class="empty">Chưa có dữ liệu</div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="section-title">➕ Thêm giao dịch</h2>
+      <form id="entryForm">
+        <input class="full" id="description" placeholder="Tên giao dịch (VD: Ăn sáng)" required maxlength="60">
+        <input id="amount" type="number" min="1" step="1000" placeholder="Số tiền (₫)" required>
+        <select id="type"><option value="expense">Chi tiêu</option><option value="income">Thu nhập</option></select>
+        <select class="full" id="category">
+          <option>Ăn uống</option><option>Di chuyển</option><option>Mua sắm</option><option>Học tập</option><option>Giải trí</option><option>Hóa đơn</option><option>Sức khỏe</option><option>Khác</option>
+        </select>
+        <input class="full" id="date" type="date" required>
+        <button class="full" type="submit">Thêm giao dịch</button>
+      </form>
+      <div class="hint">Dữ liệu được lưu trên trình duyệt của thiết bị này.</div>
+    </section>
+  </main>
+
+  <section class="card" style="margin-top:18px">
+    <h2 class="section-title">📋 Lịch sử giao dịch</h2>
+    <div class="table-wrap">
+      <table><thead><tr><th>Ngày</th><th>Nội dung</th><th>Danh mục</th><th>Loại</th><th>Số tiền</th><th></th></tr></thead>
+      <tbody id="transactionList"><tr><td colspan="6" class="empty">Chưa có giao dịch nào</td></tr></tbody></table>
+    </div>
+  </section>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const colors = ['#5267e8','#f59e0b','#16a36a','#e05260','#9b6de3','#20a4b8','#ec78a5','#8793a5'];
+const money = n => new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND',maximumFractionDigits:0}).format(n);
+let transactions = [];
+try { transactions = JSON.parse(localStorage.getItem('soChiTieuV1') || '[]'); } catch(e) { transactions = []; }
+const today = new Date();
+$('date').value = today.toISOString().slice(0,10);
+$('monthFilter').value = today.toISOString().slice(0,7);
+function save(){localStorage.setItem('soChiTieuV1',JSON.stringify(transactions));}
+function visible(){const m=$('monthFilter').value;return transactions.filter(t=>!m||t.date.startsWith(m));}
+function render(){
+ const rows=visible(), income=rows.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0), expense=rows.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+ $('totalIncome').textContent=money(income);$('totalExpense').textContent=money(expense);$('balance').textContent=money(income-expense);$('balance').className='amount '+(income-expense<0?'expense':'income');$('chartTotal').textContent=money(expense);
+ const groups={};rows.filter(t=>t.type==='expense').forEach(t=>groups[t.category]=(groups[t.category]||0)+t.amount);
+ const entries=Object.entries(groups).sort((a,b)=>b[1]-a[1]);let start=0;
+ const stops=entries.map(([name,val],i)=>{const end=start+(expense?val/expense*100:0),part=`${colors[i%colors.length]} ${start}% ${end}%`;start=end;return part;});
+ $('donut').style.background=entries.length?'conic-gradient('+stops.join(',')+')':'conic-gradient(#dce2ee 0 100%)';
+ $('legend').innerHTML=entries.length?entries.map(([name,val],i)=>`<div class="legend-item"><span class="dot" style="background:${colors[i%colors.length]}"></span><span>${name} · ${Math.round(val/expense*100)}%</span></div>`).join(''):'<div class="empty">Chưa có dữ liệu</div>';
+ const sorted=[...rows].sort((a,b)=>b.date.localeCompare(a.date));
+ $('transactionList').innerHTML=sorted.length?sorted.map(t=>`<tr><td>${t.date.split('-').reverse().join('/')}</td><td>${escapeHtml(t.description)}</td><td><span class="tag">${escapeHtml(t.category)}</span></td><td>${t.type==='income'?'Thu nhập':'Chi tiêu'}</td><td class="${t.type==='income'?'income':'expense'}">${t.type==='income'?'+':'−'} ${money(t.amount)}</td><td><button class="delete" onclick="removeTransaction('${t.id}')">Xóa</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Chưa có giao dịch nào trong tháng này</td></tr>';
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function removeTransaction(id){transactions=transactions.filter(t=>t.id!==id);save();render();}
+$('entryForm').addEventListener('submit',e=>{
+ e.preventDefault();const amount=Number($('amount').value);
+ if(!Number.isFinite(amount)||amount<=0)return;
+ transactions.push({id:String(Date.now())+Math.random().toString(16).slice(2),description:$('description').value.trim(),amount,type:$('type').value,category:$('category').value,date:$('date').value});
+ save();$('description').value='';$('amount').value='';render();
+});
+$('monthFilter').addEventListener('change',render);
+render();
+</script>
+</body>
+</html>
